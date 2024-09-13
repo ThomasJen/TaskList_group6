@@ -6,22 +6,29 @@ class Taskbox extends HTMLElement {
         const template = document.createElement("template");
         template.innerHTML = `
         <link rel="stylesheet" type="text/css" href="${import.meta.url.match(/.*\//)[0]}/taskbox.css"/>
-
-        <div class="modal-background">
-        <div class="modal-content">
+        
+        <dialog>
+        
               <span class="close-btn">&times;</span>
-              <h3>Title:</h3>
-              <input type="text" class="task-title" placeholder="Task title">
-              <h3>Status:</h3>
-              <select class="task-status">
-                 <option value="WAITING">WAITING</option>
-                 <option value="ACTIVE">ACTIVE</option>
-                 <option value="DONE">DONE</option>
-               </select>
-               <br><br>
-               <button class="add-task-btn">Add task</button>
-         </div>
-        </div>`;
+              <div>
+               <div> Title: </div>
+                <div>
+                <input type="text" size="25" maxlength="80" placeholder="Task-title" class="task-title" autofocus />
+                </div>
+              </div>
+             <div>
+              <div>Status:</div>
+                <div>
+                    <select class="task-status">
+                        <option value="WAITING">WAITING</option>
+                        <option value="ACTIVE">ACTIVE</option>
+                        <option value="DONE">DONE</option>
+                    </select>
+                </div>
+             </div>
+               <p><button type="submit" class="add-task-btn">Add task</button></p>
+        </dialog>
+        `;
         
         const shadowRoot = this.attachShadow({ mode: 'open' });
         shadowRoot.appendChild(template.content.cloneNode(true));
@@ -29,23 +36,20 @@ class Taskbox extends HTMLElement {
     }
     
     connectedCallback(){
-        const modalBackground = this.shadowRoot.querySelector('.modal-background');
+        const dialog = this.shadowRoot.querySelector('dialog');
         const closeModalBtn = this.shadowRoot.querySelector('.close-btn');
         const addTaskBtn = this.shadowRoot.querySelector('.add-task-btn');
         const taskTitleInput = this.shadowRoot.querySelector('.task-title');
         const taskStatusInput = this.shadowRoot.querySelector('.task-status');
                     
         closeModalBtn.addEventListener('click', () => {
-            this.close();
+            dialog.close();
             });
+           
         
-        modalBackground.addEventListener('click', (event) => {
-            if(event.target === modalBackground) {
-                this.close();
-                }
-            });    
-        
-        addTaskBtn.addEventListener('click', () => {
+        addTaskBtn.addEventListener('click', (event) => {
+            event.preventDefault();
+            
             const title = taskTitleInput.value || "New Task";
             const status = taskStatusInput.value;
             
@@ -62,11 +66,13 @@ class Taskbox extends HTMLElement {
     }
     
     open() {
-       this.shadowRoot.querySelector('.modal-background').classList.add('active');       
+       const dialog = this.shadowRoot.querySelector('dialog');
+       dialog.showModal();
     }
     
     close() {
-       this.shadowRoot.querySelector('.modal-background').classList.remove('active');   
+       const dialog = this.shadowRoot.querySelector('dialog');
+       dialog.close();
     }    
 }
 

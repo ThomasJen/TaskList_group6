@@ -52,9 +52,7 @@ class TaskList extends HTMLElement {
     renderTasks() {
      
         const taskListContainer = this.shadowRoot.querySelector('.task-list');
-        const taskCount = this.shadowRoot.querySelector('.task-count');
-        taskListContainer.innerHTML = '';
-        taskCount.textContent = this.tasks.length;   
+        taskListContainer.innerHTML = '';  
         
         this.tasks.forEach((task, id) => {
             const taskRow = document.createElement('tr');
@@ -92,7 +90,7 @@ class TaskList extends HTMLElement {
             });
      }
 
-    addTask(title, status = "WAITING") {
+    addTask(title, status) {
         this.tasks.push({ title, status });
         this.renderTasks();    
     } 

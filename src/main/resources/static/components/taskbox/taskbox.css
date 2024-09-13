@@ -1,6 +1,5 @@
 @charset "UTF-8";
-
-.modal-background {
+dialog {
 	display: none;
 	position: fixed;
 	top: 0;
