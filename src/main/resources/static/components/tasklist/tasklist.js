@@ -1,3 +1,5 @@
+import '../taskbox/taskbox.js';
+
 const template = document.createElement("template");
 template.innerHTML = `
     <link rel="stylesheet" type="text/css" href="${import.meta.url.match(/.*\//)[0]}/tasklist.css"/>
@@ -33,82 +35,72 @@ class TaskList extends HTMLElement {
     constructor() {
         super();
 
-        /**
-         * Fill inn rest of the code
-         */
+        const shadowroot = this.attachShadow({ mode: 'open' });
+        shadowRoot.appendChild(taskListTemplate.content.cloneNode(true));
+        
+        this.tasks = [
+            {title: "Wash floor", status: "DONE"},
+            {title: "Wash windows", status: "ACTIVE"},
+            {title: "Paint roof", status: "WAITING"}
+            ];
     }
-
-    /**
-     * @public
-     * @param {Array} list with all possible task statuses
-     */
-    setStatuseslist(allstatuses) {
-        /**
-         * Fill inn the code
-         */
+    
+    connectedCallbacks() {
+        this.renderTasks();    
     }
+    
+    renderTasks() {
+     
+        const taskListContainer = this.shadowRoot.querySelector('.task-list');
+        const taskCount = this.shadowRoot.querySelector('.task-count');
+        taskListContainer.innerHTML = '';
+        taskCount.textContent = this.tasks.length;   
+        
+        this.tasks.forEach((task, id) => {
+            const taskRow = document.createElement('tr');
+            
+            const taskTitleCell = document.createElement('td');
+            taskTitle. textContent = task.title;
+            taskRow.appendChild(taskTitleCell);
+            
+            const taskStatusCell = document.createElement('td');
+            const statusSelect = document.createElement('select');
+            ["DONE", "ACTIVE", "WAITING"].forEach(status =>{
+                const option = document.createElement('option');
+                option.value = status;
+                option.textContent = status;
+                if (task.status === status) {
+                    option.selected = true;
+                    }
+                    statusSelect.appendChild(option); 
+                });
+                taskStatusCell.appendChild(statusSelect);
+                taskRow.appendChild(taskStatusCell);
+                
+                const taskActionSell = document.createElement('td');
+                const removeButton = document.createElement('button');
+                removeButton.textContent = "Remove";
+                removeButton.addEventListener('click', () => this.removeTask(id));
+                taskActionSell.appendChild(removeButton);
+                taskRow.appendChild(taskActionSell);
+                
+                taskListContainer.appendChild(taskRow);
+                
+                statusSelect.addEventListener('change', (event) =>{
+                    this.tasks[id].status = event.target.value;                  
+                    });
+            });
+     }
 
-    /**
-     * Add callback to run on change on change of status of a task, i.e. on change in the SELECT element
-     * @public
-     * @param {function} callback
-     */
-    changestatusCallback(callback) {
-        /**
-         * Fill inn the code
-         */
-    }
+    addTask(title, status = "WAITING") {
+        this.tasks.push({ title, status });
+        this.renderTasks();    
+    } 
 
-    /**
-     * Add callback to run on click on delete button of a task
-     * @public
-     * @param {function} callback
-     */
-    deletetaskCallback(callback) {
-        /**
-         * Fill inn the code
-         */
-    }
-
-    /**
-     * Add task at top in list of tasks in the view
-     * @public
-     * @param {Object} task - Object representing a task
-     */
-    showTask(task) {
-        /**
-         * Fill inn the code
-         */
-    }
-
-    /**
-     * Update the status of a task in the view
-     * @param {Object} task - Object with attributes {'id':taskId,'status':newStatus}
-     */
-    updateTask(task) {
-        /**
-         * Fill inn the code
-         */
-    }
-
-    /**
-     * Remove a task from the view
-     * @param {Integer} task - ID of task to remove
-     */
     removeTask(id) {
-        /**
-         * Fill inn the code
-         */
-    }
-
-    /**
-     * @public
-     * @return {Number} - Number of tasks on display in view
-     */
-    getNumtasks() {
-        /**
-         * Fill inn the code
-         */
+        this.tasks.splice(id, 1);
+        this.renderTasks();
+  
     }
 }
 customElements.define('task-list', TaskList);

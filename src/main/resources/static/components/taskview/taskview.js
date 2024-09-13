@@ -1,6 +1,6 @@
 import '../tasklist/tasklist.js';
-import '../taskbox/taskbox.js';
- class TaskView extends HTMLElement {
+ 
+class TaskView extends HTMLElement {
     constructor() {
     super(); 
 
