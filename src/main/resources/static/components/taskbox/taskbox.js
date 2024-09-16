@@ -1,10 +1,5 @@
-class Taskbox extends HTMLElement {
-
-    constructor() {
-        super();
-
-        const template = document.createElement("template");
-        template.innerHTML = `
+const template = document.createElement("template");
+template.innerHTML = `
         <link rel="stylesheet" type="text/css" href="${import.meta.url.match(/.*\//)[0]}/taskbox.css"/>
         
         <dialog>
@@ -29,51 +24,70 @@ class Taskbox extends HTMLElement {
                <p><button type="submit" class="add-task-btn">Add task</button></p>
         </dialog>
         `;
-        
+class Taskbox extends HTMLElement {
+
+    constructor() {
+        super();
+
         const shadowRoot = this.attachShadow({ mode: 'open' });
         shadowRoot.appendChild(template.content.cloneNode(true));
 
+        this.dialog = shadowRoot.querySelector('dialog');
+        this.closeModalBtn = shadowRoot.querySelector('.close-btn');
+        this.addTaskBtn = shadowRoot.querySelector('.add-task-btn');
+        this.taskTitleInput = shadowRoot.querySelector('.task-title');
+        this.taskStatusSelect = shadowRoot.querySelector('.task-select');
+        this.statusesList = ["WAITING", "ACTIVE", "DONE"];
+
+        this.closeModalBtn.addEventListener('click', () => this.close());
+
+        this.dialog.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                this.close();
+            }
+        });
     }
-    
-    connectedCallback(){
-        const dialog = this.shadowRoot.querySelector('dialog');
-        const closeModalBtn = this.shadowRoot.querySelector('.close-btn');
-        const addTaskBtn = this.shadowRoot.querySelector('.add-task-btn');
-        const taskTitleInput = this.shadowRoot.querySelector('.task-title');
-        const taskStatusInput = this.shadowRoot.querySelector('.task-status');
-                    
-        closeModalBtn.addEventListener('click', () => {
-            dialog.close();
-            });
-           
-        
-        addTaskBtn.addEventListener('click', (event) => {
-            event.preventDefault();
-            
-            const title = taskTitleInput.value || "New Task";
-            const status = taskStatusInput.value;
-            
-            this.dispatchEvent(new CustomEvent('add-task', {
-               detail: { title, status },
-               bubbles: true,
-               composed: true
-            }));
-            
-            taskTitleInput.value = '';
-            taskStatusInput.value = "WAITING";
-            this.close();    
-            });    
+
+
+    show() {
+
+        this.dialog.showModal();
+
     }
-    
-    open() {
-       const dialog = this.shadowRoot.querySelector('dialog');
-       dialog.showModal();
+
+    setStatusesList(statuslist) {
+
+        this.statusesList = statuslist;
+        const select = this.shadowRoot.querySelector("select");
+        select.innerHTML = '';
+        for (const status of statuslist) {
+
+            const option = document.createElement('option');
+            option.value = status;
+            option.textContent = status;
+            select.appendChild(option);
+
+        }
+
+
     }
-    
+
+    newtaskCallback(callback) {
+
+        this.addTaskBtn.addEventListener('click', () => {
+            const status = this.taskStatusSelect.value;
+            const title = this.taskTitleInput.value;
+
+            const newTask = { title, status };
+            callback(newTask);
+        });
+    }
+
     close() {
-       const dialog = this.shadowRoot.querySelector('dialog');
-       dialog.close();
-    }    
+
+        this.dialog.close();
+
+    }
 }
 
 customElements.define('task-box', Taskbox);
