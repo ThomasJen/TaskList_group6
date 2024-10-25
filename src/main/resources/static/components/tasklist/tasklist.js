@@ -34,12 +34,44 @@ class TaskList extends HTMLElement {
 
     constructor() {
         super();
-
-        this.statusesList = ["WAITING", "ACTIVE", "DONE"];
-        const tasklist = document.querySelector("task-list");
-
+        
+        this.shadowRoot = this.attachShadow({mode: 'open'});
+        this.shadowRoot.appendChild(template.content.cloneNode(true));
+        
+        this.taskListElement = this.shadowRoot.querySelector('#tasklist');
+        this.taskListElement.appendChild(tasktable.content.cloneNode(true));
+        
+        this.tasks = [];
+        this.statuses = [];
         this.changeCallback = null;
         this.deleteCallback = null;
+
+        
+        this.shadow.addEventListener('change', (event) => {
+                          if (event.target.tagName === 'SELECT') {
+                              const selectElement = event.target;
+                              const row = selectElement.closest('tr');
+                              const taskId = row.getAttribute('data-id')  // Anta ID-en er i første kolonne
+                              const newStatus = selectElement.value;
+
+                              const confirmation = window.confirm(`Set '${taskId}' to ${newStatus}?`);
+                              if (confirmation && this.changeCallback) {
+                                  this.changeCallback(taskId, newStatus);
+                              }
+                          }
+                      });
+
+                             this.shadow.addEventListener('click', (event) => {
+                                 if (event.target.tagName === 'BUTTON' && event.target.textContent === 'Remove') {
+                                     const row = event.target.closest('tr');
+                                     const taskId = row.getAttribute('data-id')  // Anta ID-en er i første kolonne
+
+                                     const confirmation = window.confirm(`Are you sure you want to delete task ${taskId}?`);
+                                     if (confirmation && this.deleteCallback) {
+                                         this.deleteCallback(taskId);
+                                     }
+                                 }
+                             });
     }
 
     /**
@@ -58,13 +90,7 @@ class TaskList extends HTMLElement {
      */
     changestatusCallback(callback) {
 
-        const selectElement = document.getElementById(taskID).querySelector("select");
-        selectElement.addEventListener("change", () => {
-            if (confirm("Do you want to update task with id " + taskID + "?")) {
-                callback(taskID);
-
-            }
-        })
+      this.changeCallback = callback;
     }
 
     /**
@@ -72,11 +98,9 @@ class TaskList extends HTMLElement {
      * @public
      * @param {function} callback
      */
-    deletetaskCallback(callback, taskID) {
+    deletetaskCallback(callback) {
 
-        document.getElementById(taskID).querySelector("button").addEventListener('click', () => {
-            callback(taskID);
-        })
+        this.deleteCallback = callback;
     }
 
     /**

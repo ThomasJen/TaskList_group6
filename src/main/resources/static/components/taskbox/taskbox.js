@@ -29,8 +29,11 @@ class Taskbox extends HTMLElement {
     constructor() {
         super();
 
-        const shadowRoot = this.attachShadow({ mode: 'open' });
-        shadowRoot.appendChild(template.content.cloneNode(true));
+        this.shadowRoot = this.attachShadow({ mode: 'open' });
+       
+        
+        this.shadowRoot.appendChild(template.content.cloneNode(true));
+        console.log(this.shadowRoot.innerHTML);
 
         this.dialog = shadowRoot.querySelector('dialog');
         this.closeModalBtn = shadowRoot.querySelector('.close-btn');
@@ -40,12 +43,8 @@ class Taskbox extends HTMLElement {
         this.statusesList = ["WAITING", "ACTIVE", "DONE"];
 
         this.closeModalBtn.addEventListener('click', () => this.close());
-
-        this.dialog.addEventListener('keydown', (event) => {
-            if (event.key === 'Escape') {
-                this.close();
-            }
-        });
+        
+        this.taskCallback = null;
     }
 
 
@@ -57,9 +56,9 @@ class Taskbox extends HTMLElement {
 
     setStatusesList(statuslist) {
 
-        this.statusesList = statuslist;
-        const select = this.shadowRoot.querySelector("select");
-        select.innerHTML = '';
+        this.statuseSelector.innerHTML= '';
+        
+        
         for (const status of statuslist) {
 
             const option = document.createElement('option');
@@ -73,13 +72,18 @@ class Taskbox extends HTMLElement {
     }
 
     newtaskCallback(callback) {
+        
+        this.taskCallback = callback;
 
         this.addTaskBtn.addEventListener('click', () => {
-            const status = this.taskStatusSelect.value;
-            const title = this.taskTitleInput.value;
+     
+            const tasktitle = this.taskTitleInput.value;
+            const taskstatus = this.taskStatusSelect.value;
 
-            const newTask = { title, status };
-            callback(newTask);
+            const newTask = { title:tasktitle, status: taskstatus };
+            
+            this.taskCallback(newTask);
+            this.close();
         });
     }
 
