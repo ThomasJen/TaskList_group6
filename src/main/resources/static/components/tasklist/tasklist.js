@@ -1,5 +1,3 @@
-import '../taskbox/taskbox.js';
-
 const template = document.createElement("template");
 template.innerHTML = `
     <link rel="stylesheet" type="text/css" href="${import.meta.url.match(/.*\//)[0]}/tasklist.css"/>
@@ -47,11 +45,11 @@ class TaskList extends HTMLElement {
         this.deleteCallback = null;
 
         
-        this.shadow.addEventListener('change', (event) => {
+        this.shadowRoot.addEventListener('change', (event) => {
                           if (event.target.tagName === 'SELECT') {
                               const selectElement = event.target;
                               const row = selectElement.closest('tr');
-                              const taskId = row.getAttribute('data-id')  // Anta ID-en er i første kolonne
+                              const taskId = row.getAttribute('data-id');  // Anta ID-en er i første kolonne
                               const newStatus = selectElement.value;
 
                               const confirmation = window.confirm(`Set '${taskId}' to ${newStatus}?`);
@@ -61,10 +59,10 @@ class TaskList extends HTMLElement {
                           }
                       });
 
-                             this.shadow.addEventListener('click', (event) => {
+                             this.shadowRoot.addEventListener('click', (event) => {
                                  if (event.target.tagName === 'BUTTON' && event.target.textContent === 'Remove') {
                                      const row = event.target.closest('tr');
-                                     const taskId = row.getAttribute('data-id')  // Anta ID-en er i første kolonne
+                                     const taskId = row.getAttribute('data-id');  // Anta ID-en er i første kolonne
 
                                      const confirmation = window.confirm(`Are you sure you want to delete task ${taskId}?`);
                                      if (confirmation && this.deleteCallback) {
@@ -80,7 +78,7 @@ class TaskList extends HTMLElement {
      */
     setStatuseslist(allstatuses) {
 
-        this.statusesList = allstatuses;
+        this.statuses = allstatuses;
     }
 
     /**
@@ -110,32 +108,26 @@ class TaskList extends HTMLElement {
      */
     showTask(task) {
 
-        const tablecontent = tasktable.content;
-        let templatecontent = template.content;
-        templatecontent.append(tablecontent);
-        this.append(templatecontent);
-
-        const tbody = document.querySelector("tbody");
-
+        const tbody = this.taskListElement.tBodies[0];
+        
         const clone = taskrow.content.cloneNode(true);
         let tr = clone.querySelector("tr");
-        tr.setAttribute("id", task.id);
-
+        tr.setAttribute("data-id", task.id);
+        
         let td = clone.querySelectorAll("td");
-
+        
         td[0].textContent = task.title;
         td[1].textContent = task.status;
+        
+        let select = clone.querySelectorAll("td");
 
-        let select = clone.querySelector("select");
-        let list = this.statusesList
-
-        for (let status of list) {
-            let option = document.createElement("option");
-            let node = document.createTextNode(status);
-            option.appendChild(node);
-            option.setAttribute("value", status);
-            select.appendChild(option);
-        }
+        for (let status of this.statuses) {
+                let option = document.createElement("option");
+                option.textContent = status;
+                option.value = status;
+                if (status === task.status) option.selected = true;
+                select.appendChild(option);
+            }
 
         tbody.prepend(clone);
 
@@ -147,9 +139,12 @@ class TaskList extends HTMLElement {
      */
     updateTask(task) {
 
-        let tr = document.getElementById(task.id).getElementsByTagName("td")[1];
-
-        tr.innerHTML = task.newStatus;
+        let tr = this.shadowRoot.getElementById(task.id);
+              let td = tr ? tr.cells[1] : null;
+              
+              if (td) {
+                  td.textContent = task.status;
+            }  
     }
 
     /**
@@ -158,8 +153,9 @@ class TaskList extends HTMLElement {
      */
     removeTask(id) {
 
-        if (confirm("Do you want to remove task?") == true) {
-            document.getElementById(id).remove();
+        let tr = this.shadowRoot.getElementById(id);
+        if (tr && confirm("Do you want to remove task?")) {
+                    tr.remove();
         }
     }
 
@@ -168,14 +164,9 @@ class TaskList extends HTMLElement {
      * @return {Number} - Number of tasks on display in view
      */
     getNumtasks() {
-        /**
-         * Fill inn the code
-         */
-        if (document.querySelector("table")) {
-            return document.querySelector("table").rows.length - 1;
-        } else {
-            return 0;
-        }
+     
+        return this.taskListElement.tBodies[0].rows.length;
+        
     }
 
 

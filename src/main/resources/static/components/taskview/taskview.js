@@ -44,8 +44,10 @@ class TaskView extends HTMLElement {
                 
                 const statuses = await this.fetchAllStatuses();
                 if(statuses){
-                    this.taskbox.setStatusesList(statuses);
-                    this.tasklist.setStatuseslist(statuses);
+                    this.taskBox.setStatusesList(statuses);
+                    this.taskList.setStatuseslist(statuses);
+                    console.log("Fetched statuses:", statuses);
+
                     console.log(this.newTaskButton);
                     this.newTaskButton.disabled = false; 
                 }
@@ -59,7 +61,7 @@ class TaskView extends HTMLElement {
                 this.taskbox.newTaskCallback(async (newTask) => {
                     const addedTask = await this.createTask(newTask.title, newTask.status);
                     if(addedTask){
-                        this.tasklist.showTask(addedTask);
+                        this.taskList.showTask(addedTask);
                         this.updateMessage();
                     }
                 });
@@ -67,7 +69,7 @@ class TaskView extends HTMLElement {
                 this.tasklist.changestatusCallback(async (id, newStatus) => {
                     const updatedTask = await this.updateStatus(id, newStatus);
                     if(updatedTask){
-                        this.tasklist.updateTask(updatedTask);
+                        this.taskList.updateTask(updatedTask);
                     }
                 });
 
@@ -75,7 +77,7 @@ class TaskView extends HTMLElement {
             
                     const deletedTask = await this.deleteTask(id);
                      if(deletedTask){
-                            this.tasklist.removeTask(id);
+                            this.taskList.removeTask(id);
                             console.log(`Oppgaven med ID ${id} ble slettet`);
                             this.updateMessage(); 
                         } else {
@@ -85,7 +87,8 @@ class TaskView extends HTMLElement {
                     
             
                 this.newTaskButton.addEventListener('click', () => {
-                    this.taskbox.show();
+                    console.log("New task button is clicked:");
+                    this.taskBox.show();
                 });
                 
             }
@@ -171,7 +174,7 @@ class TaskView extends HTMLElement {
             }
             
             updateMessage(){
-                const numTasks = this.tasklist.getNumtasks();
+                const numTasks = this.taskList.getNumtasks();
                 if (numTasks === 0) {
                        this.messageElement.textContent = "No tasks were found";
                    } else {

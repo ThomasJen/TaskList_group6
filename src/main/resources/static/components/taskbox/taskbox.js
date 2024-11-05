@@ -35,11 +35,11 @@ class Taskbox extends HTMLElement {
         this.shadowRoot.appendChild(template.content.cloneNode(true));
         console.log(this.shadowRoot.innerHTML);
 
-        this.dialog = shadowRoot.querySelector('dialog');
-        this.closeModalBtn = shadowRoot.querySelector('.close-btn');
-        this.addTaskBtn = shadowRoot.querySelector('.add-task-btn');
-        this.taskTitleInput = shadowRoot.querySelector('.task-title');
-        this.taskStatusSelect = shadowRoot.querySelector('.task-select');
+        this.dialog = this.shadowRoot.querySelector('dialog');
+        this.closeModalBtn = this.shadowRoot.querySelector('.close-btn');
+        this.addTaskBtn = this.shadowRoot.querySelector('.add-task-btn');
+        this.taskTitleInput = this.shadowRoot.querySelector('.task-title');
+        this.taskStatusSelect = this.shadowRoot.querySelector('.task-status');
         this.statusesList = ["WAITING", "ACTIVE", "DONE"];
 
         this.closeModalBtn.addEventListener('click', () => this.close());
@@ -56,7 +56,7 @@ class Taskbox extends HTMLElement {
 
     setStatusesList(statuslist) {
 
-        this.statuseSelector.innerHTML= '';
+        this.taskStatusSelect.innerHTML= '';
         
         
         for (const status of statuslist) {
@@ -64,7 +64,7 @@ class Taskbox extends HTMLElement {
             const option = document.createElement('option');
             option.value = status;
             option.textContent = status;
-            select.appendChild(option);
+            this.taskStatusSelect.appendChild(option);
 
         }
 
@@ -82,8 +82,10 @@ class Taskbox extends HTMLElement {
 
             const newTask = { title:tasktitle, status: taskstatus };
             
-            this.taskCallback(newTask);
-            this.close();
+            if (this.taskCallback) {
+                            this.taskCallback(newTask);
+            }
+            this.close();;
         });
     }
 
